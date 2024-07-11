@@ -34,8 +34,8 @@ async def start_bot():
     # Including Routers
     dp.include_routers(
         other_router,
-        user_router,
-        admin_router
+        admin_router,
+        user_router
     )
 
     # Starting Bot
