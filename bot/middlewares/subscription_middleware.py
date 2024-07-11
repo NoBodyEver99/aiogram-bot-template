@@ -1,6 +1,7 @@
 from typing import Callable, Dict, Any, Awaitable, Union
 
 from aiogram import BaseMiddleware
+from aiogram.enums import ChatMemberStatus
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup as IKeyboard, InlineKeyboardButton as IButton
 from loguru import logger
 
@@ -23,17 +24,23 @@ class SubscriptionMiddleware(BaseMiddleware):
         channels_keyboard = []
 
         for channel in await Channel.all():
-            user = await bot.get_chat_member(channel.id, user.user_id)
+            user = await bot.get_chat_member(channel.chat_id, user.user_id)
 
-            if not user.is_member:
+            if user.status not in (
+                ChatMemberStatus.CREATOR,
+                ChatMemberStatus.ADMINISTRATOR,
+                ChatMemberStatus.MEMBER
+            ):
                 channels_keyboard.append([IButton(text=channel.title, url=channel.url)])
 
         if channels_keyboard:
-            channels_keyboard.append([IButton(text="✅ Я подписался", callback_data="CheckSubscription")])
+            channels_keyboard.append([IButton(text="Проверить подписку 🔐", callback_data="CheckSubscription")])
 
             await bot.send_message(
                 event.from_user.id,
-                "Чтобы пользоваться ботом вы должны подписаться на каналы",
+                "<b>"
+                "🖤Бот работает только после подписки на наш канал, поэтому подписывайтесь и включайте уведомления👇🏻"
+                "</b>",
                 reply_markup=IKeyboard(inline_keyboard=channels_keyboard)
             )
         else:
